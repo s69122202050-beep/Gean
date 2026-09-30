@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrailWise Bike — อุทยานดอยหลวง ระบบวางแผนเส้นทางปั่นจักรยาน</title>
+<style>
+:root{--pri:#0e7490;--pri-d:#155e75;--acc:#f59e0b;--bg:#f0f9ff;--card:#fff;--tx:#0f172a;--mut:#64748b;--bd:#bae6fd}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Sarabun","Noto Sans Thai",system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+header{background:var(--pri-d);color:#fff;position:sticky;top:0;z-index:9}
+.bar{max-width:1100px;margin:auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.logo b{font-size:1.25rem}.logo small{display:block;opacity:.8;font-size:.75rem}
+nav a{color:#fff;text-decoration:none;padding:6px 12px;border-radius:8px;font-size:.92rem;display:inline-block}
+nav a.on,nav a:hover{background:var(--acc);color:#111}
+main{max-width:1100px;margin:auto;padding:20px 16px 40px}
+.page{display:none}.page.on{display:block}
+.hero{background:linear-gradient(135deg,var(--pri),#0891b2);color:#fff;border-radius:18px;padding:36px 24px;margin-bottom:24px}
+.hero h1{font-size:clamp(1.6rem,5vw,2.4rem);margin:8px 0}
+.tag{background:rgba(255,255,255,.2);padding:3px 12px;border-radius:99px;font-size:.85rem}
+.btn{display:inline-block;border:0;cursor:pointer;background:var(--acc);color:#111;font:inherit;font-weight:700;padding:10px 20px;border-radius:10px;text-decoration:none;margin:12px 8px 0 0}
+.btn.o{background:transparent;color:#fff;border:2px solid #fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin:14px 0 26px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px}
+.card .em{font-size:2rem}.card h3{font-size:1.05rem;margin:4px 0}.card p{color:var(--mut);font-size:.9rem}
+.card.click{cursor:pointer;transition:.15s}.card.click:hover{transform:translateY(-3px);border-color:var(--pri)}
+h2{color:var(--pri-d);margin:6px 0 4px}.sub{color:var(--mut);margin-bottom:14px}
+.two{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+@media(max-width:800px){.two{grid-template-columns:1fr}}
+label{display:block;font-weight:700;margin:12px 0 4px;font-size:.92rem}
+select,input[type=search]{width:100%;padding:9px;border:1px solid var(--bd);border-radius:9px;font:inherit;background:#fff}
+.opt{display:flex;gap:8px;padding:8px;border:1px solid var(--bd);border-radius:9px;margin-top:6px;font-size:.9rem;cursor:pointer}
+.opt:has(input:checked){border-color:var(--pri);background:#ecfeff}
+.mapbox{background:#e0f2fe;border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+svg{display:block;width:100%;height:auto}
+.n{cursor:pointer}.n circle{fill:#fff;stroke:var(--pri);stroke-width:.8}
+.n:hover circle,.n.s circle{fill:var(--acc)}.n.e circle{fill:var(--pri);stroke:var(--acc)}
+.n text.l{font-size:2.6px;fill:var(--tx);font-weight:700;text-anchor:middle}
+.ed{stroke:#7dd3fc;stroke-width:.9;stroke-dasharray:1.5 1}
+.ekm{font-size:2.2px;fill:var(--mut);text-anchor:middle}
+.rt{stroke:var(--acc);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-dasharray:3 2;animation:mv 1s linear infinite}
+@keyframes mv{to{stroke-dashoffset:-5}}
+.sum{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.sum div{flex:1;min-width:110px;background:#ecfeff;border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.sum b{display:block;font-size:1.3rem;color:var(--pri-d)}
+ol.steps{list-style:none;padding:0;counter-reset:s}
+ol.steps li{counter-increment:s;display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--bd)}
+ol.steps li:before{content:counter(s);background:var(--pri);color:#fff;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:.85rem}
+.leg{color:var(--mut);font-size:.8rem}
+.note{background:#fffbeb;border-left:4px solid var(--acc);padding:10px 14px;border-radius:8px;margin:10px 0;font-size:.9rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{border:1px solid var(--pri);background:#fff;color:var(--pri);padding:4px 14px;border-radius:99px;cursor:pointer;font:inherit;font-size:.85rem}
+.chip.on{background:var(--pri);color:#fff}
+footer{background:var(--pri-d);color:#cffafe;text-align:center;padding:18px;font-size:.85rem}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="logo"><b>🚵 TrailWise Bike</b><small>อุทยานแห่งชาติดอยหลวง · ระบบวางแผนเส้นทางปั่นจักรยาน</small></div>
+  <nav id="nav">
+    <a href="#home">หน้าแรก & เกี่ยวกับเรา</a><a href="#route">วางแผนทริป</a><a href="#map">แผนที่เครือข่าย</a><a href="#places">สถานที่ทั้งหมด</a>
+  </nav>
+</div></header>
+
+<main>
+<!-- HOME -->
+<section class="page" id="home">
+  <div class="hero">
+    <span class="tag">ยินดีต้อนรับสู่อุทยานแห่งชาติดอยหลวง</span>
+    <h1>วางแผนปั่นจักรยานอย่างมั่นใจ ปลอดภัยทุกเส้นทาง</h1>
+    <p>TrailWise Bike คือผู้ช่วยวางแผนเส้นทางปั่นจักรยานเสือภูเขา คำนวณระยะทาง เวลา และจุดแวะพักในอุทยานอย่างแม่นยำ</p>
+    <a class="btn" href="#route">เริ่มวางแผนทริป</a><a class="btn o" href="#map">ดูสำรวจเส้นทาง</a>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="em">📍</div><h3>7 จุดเช็คอินสำคัญ</h3><p>ครอบคลุมน้ำตก ลำธาร ถ้ำ ยอดดอย จุดชมวิว และจุดกางเต็นท์พักแรม</p></div>
+    <div class="card"><div class="em">⏱️</div><h3>คำนวณแม่นยำ</h3><p>ประเมินระยะทางและเวลาปั่น ให้คุณวางแผนได้อย่างปลอดภัย</p></div>
+    <div class="card"><div class="em">🚲</div><h3>ตอบโจทย์นักปั่น</h3><p>เลือกได้ทั้งเส้นทางสั้นที่สุด แวะพักน้อยที่สุด หรือปั่นชมธรรมชาติ</p></div>
+  </div>
+  <h2>จุดหมายไฮไลต์ในอุทยาน</h2><p class="sub">คลิกเพื่อวางแผนไปยังสถานที่นั้นทันที</p>
+  <div class="grid" id="hl"></div>
+  <h2>เกี่ยวกับอุทยานแห่งชาติดอยหลวง</h2>
+  <p class="sub">ผืนป่าธรรมชาติ ลำธาร น้ำตก และยอดดอยสูงที่มีทัศนียภาพงดงาม เหมาะกับการปั่นจักรยานเสือภูเขาและปั่นท่องเที่ยว</p>
+  <div class="grid">
+    <div class="card"><h3>🕒 เวลาทำการอุทยาน</h3><p>เปิดทุกวัน 06:00 – 18:00 น.<br>ไม่อนุญาตให้เริ่มปั่นเข้าเส้นทางหลัง 15:00 น. เพื่อความปลอดภัย</p></div>
+    <div class="card"><h3>📞 ติดต่อศูนย์บริการ</h3><p>โทร: xxx-xxx-xxxx<br>อีเมล: contact@doiluang-trailwise.go.th<br>ที่ตั้ง: ศูนย์บริการนักท่องเที่ยวหลัก</p></div>
+  </div>
+  <h2>ข้อปฏิบัติและคำแนะนำในการปั่น</h2>
+  <div class="grid">
+    <div class="card"><h3>1. สวมหมวกกันน็อกเสมอ</h3><p>สวมหมวกและถุงมือทุกครั้ง เส้นทางมีทางลาดชันและโขดหิน</p></div>
+    <div class="card"><h3>2. ตรวจสภาพจักรยาน</h3><p>เช็กเบรก ลมยาง โซ่ และพกชุดปะยาง/ปั๊มลมสำรอง</p></div>
+    <div class="card"><h3>3. เตรียมน้ำและลงทะเบียน</h3><p>พกน้ำอย่างน้อย 1.5–2 ลิตร และแจ้งเส้นทางที่ศูนย์บริการก่อนออกเดินทาง</p></div>
+  </div>
+</section>
+
+<!-- ROUTE -->
+<section class="page" id="route">
+  <h2>ระบบวางแผนทริปปั่นจักรยาน</h2>
+  <p class="sub">เลือกจุดเริ่มต้นและจุดหมาย ระบบจะคำนวณเส้นทางที่ดีที่สุดให้อัตโนมัติ</p>
+  <div class="two">
+    <div class="card">
+      <h3>กำหนดเงื่อนไขการเดินทาง</h3>
+      <label>จุดเริ่มต้น</label><select id="from"></select>
+      <label>จุดหมายปลายทาง</label><select id="to"></select>
+      <label>เงื่อนไขการค้นหาเส้นทาง</label>
+      <label class="opt"><input type="radio" name="mode" value="short" checked><span>เส้นทางสั้นที่สุด (ระยะทางจริง กม.)</span></label>
+      <label class="opt"><input type="radio" name="mode" value="fewest"><span>แวะพักน้อยที่สุด (ผ่านจุดน้อยที่สุด)</span></label>
+      <label class="opt"><input type="radio" name="mode" value="nature"><span>ปั่นชมธรรมชาติ (ผ่านจุดเช็คอินมากที่สุด)</span></label>
+      <button class="btn" id="go" style="width:100%">ค้นหาเส้นทางแนะนำ</button>
+      <div class="note" id="tip"></div>
+    </div>
+    <div>
+      <div class="mapbox" id="rmap"></div>
+      <p class="leg">คลิกที่จุดบนแผนที่เพื่อเปลี่ยนปลายทางได้</p>
+      <div id="res"><p class="sub">กรุณาเลือกจุดเริ่มต้นและปลายทาง แล้วกดค้นหา</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="page" id="map">
+  <h2>แผนที่เครือข่ายเส้นทาง</h2>
+  <p class="sub">เส้นประคือเส้นทางปั่นระหว่างจุด ตัวเลขคือระยะทาง (กม.) คลิกจุดเพื่อดูรายละเอียด</p>
+  <div class="mapbox" id="fmap"></div>
+  <div class="card" id="info" style="margin-top:14px"><p class="sub">คลิกจุดบนแผนที่เพื่อดูข้อมูล</p></div>
+</section>
+
+<!-- PLACES -->
+<section class="page" id="places">
+  <h2>สถานที่และกิจกรรมทั้งหมด</h2>
+  <p class="sub">สำรวจจุดแวะพัก สิ่งอำนวยความสะดวก และกิจกรรมยอดนิยมในอุทยาน</p>
+  <input type="search" id="q" placeholder="ค้นหาสถานที่หรือกิจกรรม">
+  <div class="chips" id="chips"></div>
+  <div class="grid" id="plist"></div>
+</section>
+</main>
+
+<footer>TrailWise Bike — Doi Luang Trail Planner<br>อุทยานแห่งชาติดอยหลวง · © 2026 TrailWise Project. All rights reserved.</footer>
+
+<script>
+/* ---------- ข้อมูล ---------- */
+const P=[
+ {id:1,n:"ศูนย์บริการนักท่องเที่ยว",t:"บริการ",e:"🏠",x:14,y:82,el:400,d:"จุดเริ่มต้น ลงทะเบียน เช่าจักรยาน ซ่อมบำรุง ห้องน้ำ และร้านอาหาร",a:["ลงทะเบียน","เช่าจักรยาน","ซ่อมจักรยาน"]},
+ {id:2,n:"ลานกางเต็นท์ป่าสน",t:"พักแรม",e:"⛺",x:30,y:58,el:620,d:"ลานกางเต็นท์ร่มรื่น มีห้องน้ำและจุดล็อกจักรยาน",a:["กางเต็นท์","ก่อกองไฟ","ดูดาว"]},
+ {id:3,n:"ลำธารใส",t:"ลำธาร",e:"🏞️",x:22,y:32,el:700,d:"ลำธารน้ำใสไหลผ่านป่า จุดพักเติมน้ำและล้างจักรยาน",a:["พักผ่อน","ถ่ายภาพ"]},
+ {id:4,n:"น้ำตกดอยหลวง",t:"น้ำตก",e:"💦",x:50,y:24,el:850,d:"น้ำตกหลายชั้นกลางป่า ทางปั่นผ่านป่าร่มรื่น",a:["ชมน้ำตก","ถ่ายภาพ","ปิกนิก"]},
+ {id:5,n:"ถ้ำหินงาม",t:"ถ้ำ",e:"🕳️",x:58,y:58,el:780,d:"ถ้ำหินงอกหินย้อย ต้องจอดจักรยานแล้วเดินเข้าชม (ควรพกไฟฉาย)",a:["สำรวจถ้ำ","ศึกษาธรรมชาติ"]},
+ {id:6,n:"จุดชมวิวผาเงื้อม",t:"จุดชมวิว",e:"🌄",x:80,y:42,el:1100,d:"ชมทะเลหมอกและพระอาทิตย์ขึ้น ทางขึ้นค่อนข้างชัน",a:["ชมวิว","ทะเลหมอก","ถ่ายภาพ"]},
+ {id:7,n:"ยอดดอยหลวง",t:"ยอดดอย",e:"⛰️",x:86,y:14,el:1450,d:"จุดสูงสุดของอุทยาน สำหรับนักปั่นที่มีประสบการณ์",a:["พิชิตยอดดอย","ชมวิว 360°"]}
+];
+const E=[[1,2,2.5],[1,5,4.8],[2,3,3.0],[2,5,3.2],[2,4,5.0],[3,4,2.4],[4,7,5.5],[4,6,4.0],[5,6,3.6],[6,7,2.8]];
+const byId=Object.fromEntries(P.map(p=>[p.id,p]));
+const adj={};P.forEach(p=>adj[p.id]=[]);E.forEach(([a,b,k])=>{adj[a].push([b,k]);adj[b].push([a,k])});
+const SPEED=10,STOP_MIN=5; // กม./ชม. เฉลี่ยบนเส้นทางออฟโรด, นาทีต่อจุดแวะ
+const km=(a,b)=>adj[a].find(x=>x[0]===b)[1];
+const $=s=>document.querySelector(s);
+
+/* ---------- ค้นหาเส้นทาง ---------- */
+function allPaths(s,t){const out=[];(function dfs(u,path){if(u===t){out.push(path.slice());return}
+  for(const[v]of adj[u])if(!path.includes(v)){path.push(v);dfs(v,path);path.pop()}})(s,[s]);return out}
+const dist=p=>p.slice(1).reduce((s,v,i)=>s+km(p[i],v),0);
+function findRoute(s,t,mode){
+  const ps=allPaths(s,t);
+  const key={short:p=>[dist(p)],fewest:p=>[p.length,dist(p)],nature:p=>[-p.length,dist(p)]}[mode];
+  return ps.sort((a,b)=>{const x=key(a),y=key(b);return x[0]-y[0]||(x[1]||0)-(y[1]||0)})[0];
+}
+function climb(p){let up=0;p.slice(1).forEach((v,i)=>{const d=byId[v].el-byId[p[i]].el;if(d>0)up+=d});return up}
+
+/* ---------- แผนที่ SVG ---------- */
+function drawMap(box,{path=[],from,to,onClick}={}){
+  let s=`<svg viewBox="0 0 100 100" role="img" aria-label="แผนที่เส้นทางปั่นจักรยาน">
+  <rect width="100" height="100" fill="#e0f2fe"/>
+  <path d="M0 70 Q25 55 45 68 T100 60 V100 H0Z" fill="#bae6fd" opacity=".5"/>
+  <path d="M60 0 Q75 20 100 25 V0Z" fill="#a7f3d0" opacity=".6"/>`;
+  E.forEach(([a,b,k])=>{const A=byId[a],B=byId[b];
+    s+=`<line class="ed" x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}"/><text class="ekm" x="${(A.x+B.x)/2}" y="${(A.y+B.y)/2-1}">${k}</text>`});
+  if(path.length>1)s+=`<polyline class="rt" points="${path.map(i=>byId[i].x+','+byId[i].y).join(' ')}"/>`;
+  P.forEach(p=>{const c=(p.id===from?' s':'')+(p.id===to?' e':'');
+    s+=`<g class="n${c}" data-id="${p.id}"><circle cx="${p.x}" cy="${p.y}" r="4"/><text x="${p.x}" y="${p.y+1.4}" font-size="4" text-anchor="middle">${p.e}</text><text class="l" x="${p.x}" y="${p.y+8}">${p.n}</text></g>`});
+  box.innerHTML=s+'</svg>';
+  box.querySelectorAll('.n').forEach(g=>g.onclick=()=>onClick&&onClick(+g.dataset.id));
+}
+
+/* ---------- หน้าวางแผนทริป ---------- */
+const TIPS={short:"<b>เส้นทางสั้นที่สุด:</b> เลือกเส้นทางที่ระยะทางรวมน้อยที่สุด ประหยัดแรงและเวลา",
+ fewest:"<b>แวะพักน้อยที่สุด:</b> ผ่านจุดระหว่างทางน้อยที่สุด เหมาะกับการปั่นต่อเนื่อง",
+ nature:"<b>ปั่นชมธรรมชาติ:</b> ผ่านจุดเช็คอินให้มากที่สุดเพื่อสำรวจรายทาง"};
+const opts=P.map(p=>`<option value="${p.id}">${p.e} ${p.n}</option>`).join('');
+$('#from').innerHTML=opts;$('#to').innerHTML=opts;$('#to').value=4;
+const mode=()=>document.querySelector('[name=mode]:checked').value;
+function plan(){
+  const s=+$('#from').value,t=+$('#to').value;
+  if(s===t){drawMap($('#rmap'),{from:s,to:t,onClick:setTo});$('#res').innerHTML='<div class="note">กรุณาเลือกจุดเริ่มต้นและปลายทางให้ต่างกัน</div>';return}
+  const p=findRoute(s,t,mode()),d=dist(p),stops=p.length-2;
+  const min=Math.round(d/SPEED*60+stops*STOP_MIN);
+  drawMap($('#rmap'),{path:p,from:s,to:t,onClick:setTo});
+  $('#tip').innerHTML=TIPS[mode()];
+  $('#res').innerHTML=`<div class="sum"><div><b>${d.toFixed(1)} กม.</b>ระยะทางรวม</div><div><b>${Math.floor(min/60)} ชม. ${min%60} น.</b>เวลาโดยประมาณ</div><div><b>${stops}</b>จุดแวะพัก</div><div><b>${climb(p)} ม.</b>ความสูงสะสมขึ้น</div></div>
+  <h3>ลำดับจุดแวะพักและการเดินทาง</h3><ol class="steps">${p.map((id,i)=>`<li><div><b>${byId[id].e} ${byId[id].n}</b><div class="leg">${i?`ปั่นจาก ${byId[p[i-1]].n} · ${km(p[i-1],id)} กม.`:'จุดเริ่มต้น'} · สูง ${byId[id].el} ม.</div></div></li>`).join('')}</ol>
+  <div class="note">🚲 คำนวณจากความเร็วเฉลี่ย ${SPEED} กม./ชม. + ${STOP_MIN} นาทีต่อจุดแวะ · ต้องเริ่มปั่นก่อน 15:00 น.</div>`;
+}
+function setTo(id){$('#to').value=id;plan()}
+$('#go').onclick=plan;
+document.querySelectorAll('[name=mode]').forEach(r=>r.onchange=plan);
+$('#from').onchange=$('#to').onchange=plan;
+
+/* ---------- หน้าแผนที่ ---------- */
+function showInfo(id){const p=byId[id];
+  drawMap($('#fmap'),{from:id,onClick:showInfo});
+  $('#info').innerHTML=`<h3>${p.e} ${p.n}</h3><p class="leg">${p.t} · ความสูง ${p.el} ม.</p><p>${p.d}</p><p>เส้นทางเชื่อมต่อ: ${adj[id].map(([v,k])=>byId[v].n+' ('+k+' กม.)').join(', ')}</p><button class="btn" onclick="goPlan(${id})">ปั่นไปที่นี่</button>`}
+function goPlan(id){$('#to').value=id;location.hash='#route'}
+
+/* ---------- หน้าสถานที่ ---------- */
+let cat='ทั้งหมด';
+const cats=['ทั้งหมด',...new Set(P.map(p=>p.t))];
+$('#chips').innerHTML=cats.map(c=>`<button class="chip${c===cat?' on':''}">${c}</button>`).join('');
+$('#chips').onclick=e=>{if(e.target.classList.contains('chip')){cat=e.target.textContent;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.textContent===cat));list()}};
+$('#q').oninput=list;
+function list(){const q=$('#q').value.trim();
+  const r=P.filter(p=>(cat==='ทั้งหมด'||p.t===cat)&&(!q||(p.n+p.d+p.a.join(' ')).includes(q)));
+  $('#plist').innerHTML=r.map(p=>`<div class="card click" onclick="goPlan(${p.id})"><div class="em">${p.e}</div><h3>${p.n}</h3><p>${p.d}</p><p class="leg">${p.a.join(' · ')}</p></div>`).join('')||'<p class="sub">ไม่พบสถานที่ที่ค้นหา</p>'}
+
+/* ---------- หน้าแรก ---------- */
+$('#hl').innerHTML=P.slice(2,7).map(p=>`<div class="card click" onclick="goPlan(${p.id})"><div class="em">${p.e}</div><h3>${p.n}</h3><p>${p.d}</p></div>`).join('');
+
+/* ---------- Router ---------- */
+function route(){
+  const h=(location.hash||'#home').slice(1);const id=['home','route','map','places'].includes(h)?h:'home';
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id===id));
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));
+  if(id==='route')plan();if(id==='map')showInfo(4);if(id==='places')list();
+  scrollTo(0,0);
+}
+addEventListener('hashchange',route);route();
+</script>
+</body>
+</html>
